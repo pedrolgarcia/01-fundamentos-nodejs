@@ -1,5 +1,6 @@
 import http from 'node:http'
 import { json } from './middlewares/json.js'
+import { Database } from './database.js'
 
 // GET - Buscar registros
 // POST - Criar um registro
@@ -10,7 +11,7 @@ import { json } from './middlewares/json.js'
 // stateful - dados armazenados localmente em memoria
 // stateless
 
-const users = []
+const database = new Database()
 
 // JSON - JavaScript Object Notation
 
@@ -22,17 +23,21 @@ const server = http.createServer(async (req, res) => {
   await json(req, res)
 
   if (method === 'GET' && url === '/users') {
+    const users = database.select('users')
+
     return res.end(JSON.stringify(users))
   }
 
   if (method === 'POST' && url === '/users') {
     const { name, email } = req.body
 
-    users.push({
+    const user = {
       id: 1,
       name,
       email,
-    })
+    }
+
+    database.insert('users', user)
 
     return res.writeHead(201).end()
   }
